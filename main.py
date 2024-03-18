@@ -8,6 +8,7 @@ import os
 OLDEST_EPOCH = 1356998400070
 LICHESS_TOKEN = os.environ["LICHESS_TOKEN"]
 LIMIT_PER_USER = 200
+USERS = ["AlphaBotical", "tmftmftmf", "gbfgbfgbf", "MinOpponentMoves"]
 
 
 def get_user_games(user_name: str, since: int):
@@ -50,7 +51,7 @@ def main(request):
     print(f"Old state: {old_state}")
     games = []
     has_more = False
-    for user in ["AlphaBotical"]:
+    for user in USERS:
         last_epoch = old_state.get(user, OLDEST_EPOCH)
         user_games = get_user_games(user, last_epoch)
         if user_games:
