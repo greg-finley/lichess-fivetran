@@ -22,7 +22,7 @@ def get_user_games(user_name: str, since: int):
             "since": str(since),
             "pgnInJson": "true",
             "max": str(LIMIT_PER_USER),
-            "sort": "dateDesc",
+            "sort": "dateAsc",
             "lastFen": "true",
         },
     )
@@ -54,7 +54,7 @@ def main(request):
         last_epoch = old_state.get(user, OLDEST_EPOCH)
         user_games = get_user_games(user, last_epoch)
         if user_games:
-            newest_game = user_games[0]
+            newest_game = user_games[-1]
             new_state[user] = newest_game["createdAt"]
             num_games = len(user_games)
             print(f"Found {num_games} games for {user}")
