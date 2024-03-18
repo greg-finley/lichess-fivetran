@@ -56,7 +56,7 @@ def main(request):
         user_games = get_user_games(user, last_epoch)
         if user_games:
             newest_game = user_games[-1]
-            new_state[user] = newest_game["createdAt"]
+            new_state[user] = newest_game["createdAt"] + 1
             num_games = len(user_games)
             print(f"Found {num_games} games for {user}")
             if num_games == LIMIT_PER_USER:
