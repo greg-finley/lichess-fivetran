@@ -56,10 +56,13 @@ def main(request):
         if user_games:
             newest_game = user_games[0]
             new_state[user] = newest_game["createdAt"]
-            if len(user_games) == LIMIT_PER_USER:
+            num_games = len(user_games)
+            print(f"Found {num_games} games for {user}")
+            if num_games == LIMIT_PER_USER:
                 has_more = True
             games.extend(get_user_games(user, last_epoch))
 
+    print(f"New state: {new_state}")
     fivetran_format = to_fivetran_format(games, has_more, new_state)
 
     return Response(json.dumps(fivetran_format), mimetype="application/json")
