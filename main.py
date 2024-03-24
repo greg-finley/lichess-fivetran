@@ -10,7 +10,13 @@ import os
 OLDEST_EPOCH = 1356998400070
 LICHESS_TOKEN = os.environ["LICHESS_TOKEN"]
 LIMIT_PER_USER = 200
-USERS = ["AlphaBotical", "tmftmftmf", "gbfgbfgbf", "MinOpponentMoves"]
+USERS = [
+    "AlphaBotical",
+    "tmftmftmf",
+    "gbfgbfgbf",
+    "MinOpponentMoves",
+    "HalfStockfishBot",
+]
 
 
 class HttpClient:
