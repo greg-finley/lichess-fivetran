@@ -1,6 +1,8 @@
 import copy
 import requests
 import json
+from requests.adapters import HTTPAdapter, Retry
+
 
 from flask import Response  # type: ignore
 import os
@@ -11,9 +13,23 @@ LIMIT_PER_USER = 200
 USERS = ["AlphaBotical", "tmftmftmf", "gbfgbfgbf", "MinOpponentMoves"]
 
 
+class HttpClient:
+    def __init__(self):
+        self.s = requests.Session()
+        retries = Retry(total=3, backoff_factor=60)
+        self.s.mount("https://", HTTPAdapter(max_retries=retries))
+        self.s.mount("http://", HTTPAdapter(max_retries=retries))
+
+    def get(self, url: str, *, params=None, headers=None):
+        return self.s.get(url, params=params, headers=headers)
+
+
+http_client = HttpClient()
+
+
 def get_user_games(user_name: str, since: int):
     url = f"https://lichess.org/api/games/user/{user_name}"
-    response = requests.get(
+    response = http_client.get(
         url,
         headers={
             "Accept": "application/x-ndjson",
