@@ -2,6 +2,7 @@ import copy
 import requests
 import json
 from requests.adapters import HTTPAdapter, Retry
+from time import sleep
 
 
 from flask import Response  # type: ignore
@@ -73,7 +74,11 @@ def main(request):
     print(f"Old state: {old_state}")
     games = []
     has_more = False
+    first_user = True
     for user in USERS:
+        if not first_user:
+            sleep(60)
+        first_user = False
         last_epoch = old_state.get(user, OLDEST_EPOCH)
         user_games = get_user_games(user, last_epoch)
         if user_games:
