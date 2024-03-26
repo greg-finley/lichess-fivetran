@@ -79,7 +79,9 @@ def main(request):
     print(f"Old state: {old_state}")
     games = []
     has_more = False
-    for user in USERS:
+    for i, user in enumerate(USERS):
+        if not i == 0:
+            sleep(2)
         last_epoch = old_state.get(user, OLDEST_EPOCH)
         user_games = get_user_games(user, last_epoch)
         if user_games:
