@@ -16,7 +16,7 @@ USERS = [
     "tmftmftmf",
     "gbfgbfgbf",
     "MinOpponentMoves",
-    "HalfStockfishBot",
+    # "HalfStockfishBot",
 ]
 
 
