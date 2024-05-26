@@ -1,16 +1,14 @@
-import copy
 import requests
 import json
 from requests.adapters import HTTPAdapter, Retry
-from time import sleep
+from time import sleep, time
 
 
 from flask import Response  # type: ignore
 import os
 
-OLDEST_EPOCH = 1356998400070
+TWO_DAYS_AGO = round(time() * 1000) - 172800000
 LICHESS_TOKEN = os.environ["LICHESS_TOKEN"]
-LIMIT_PER_USER = 200
 USERS = [
     "AlphaBotical",
     "tmftmftmf",
@@ -45,7 +43,6 @@ def get_user_games(user_name: str, since: int, is_retry: bool = False):
         params={
             "since": str(since),
             "pgnInJson": "true",
-            "max": str(LIMIT_PER_USER),
             "sort": "dateAsc",
             "lastFen": "true",
         },
@@ -69,31 +66,14 @@ def to_fivetran_format(games, has_more, state):
 
 
 def main(request):
-    request_json = request.get_json(silent=True)
-    old_state = (
-        request_json.get("state", {})
-        if request_json and "state" in request_json
-        else {}
-    )
-    new_state = copy.deepcopy(old_state)
-    print(f"Old state: {old_state}")
     games = []
-    has_more = False
     for i, user in enumerate(USERS):
         if not i == 0:
             sleep(2)
-        last_epoch = old_state.get(user, OLDEST_EPOCH)
-        user_games = get_user_games(user, last_epoch)
-        if user_games:
-            newest_game = user_games[-1]
-            new_state[user] = newest_game["createdAt"] + 1
-            num_games = len(user_games)
-            print(f"Found {num_games} games for {user}")
-            if num_games == LIMIT_PER_USER:
-                has_more = True
-            games.extend(get_user_games(user, last_epoch))
+        user_games = get_user_games(user, TWO_DAYS_AGO)
+        print(f"Found {len(user_games)} games for {user}")
+        games.extend(user_games)
 
-    print(f"New state: {new_state}")
-    fivetran_format = to_fivetran_format(games, has_more, new_state)
+    fivetran_format = to_fivetran_format(games, has_more=False, state={})
 
     return Response(json.dumps(fivetran_format), mimetype="application/json")
