@@ -11,8 +11,8 @@ TWO_DAYS_AGO = round(time() * 1000) - 172800000
 LICHESS_TOKEN = os.environ["LICHESS_TOKEN"]
 USERS = [
     "AlphaBotical",
-    "tmftmftmf",
-    "gbfgbfgbf",
+    # "tmftmftmf",
+    # "gbfgbfgbf",
     "MinOpponentMoves",
     # "HalfStockfishBot",
 ]
@@ -42,9 +42,12 @@ def get_user_games(user_name: str, since: int, is_retry: bool = False):
         },
         params={
             "since": str(since),
-            "pgnInJson": "true",
+            # "pgnInJson": "true",
             "sort": "dateAsc",
-            "lastFen": "true",
+            # "lastFen": "true",
+            "max": 1,
+            "tags": "false",
+            "moves": "false",
         },
     )
     if response.status_code == 429:
@@ -56,24 +59,13 @@ def get_user_games(user_name: str, since: int, is_retry: bool = False):
     return [json.loads(game) for game in response.text.strip().split("\n") if game]
 
 
-def to_fivetran_format(games, has_more, state):
-    return {
-        "hasMore": has_more,
-        "insert": {"games": games},
-        "state": state,
-        "schema": {"games": {"primary_key": ["id"]}},
-    }
-
-
 def main(request):
-    games = []
     for i, user in enumerate(USERS):
-        if not i == 0:
-            sleep(2)
+        # if not i == 0:
+        #     sleep(2)
         user_games = get_user_games(user, TWO_DAYS_AGO)
-        print(f"Found {len(user_games)} games for {user}")
-        games.extend(user_games)
+        if not user_games:
+            raise Exception(f"Failed to get games for {user}")
+        print(f"Found recent games for {user}")
 
-    fivetran_format = to_fivetran_format(games, has_more=False, state={})
-
-    return Response(json.dumps(fivetran_format), mimetype="application/json")
+    return Response(json.dumps({"ok": True}), mimetype="application/json")
