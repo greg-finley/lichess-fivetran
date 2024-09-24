@@ -4,7 +4,7 @@ from requests.adapters import HTTPAdapter, Retry
 from time import sleep, time
 
 
-from flask import Response  # type: ignore
+import functions_framework  # type: ignore
 import os
 
 TWO_DAYS_AGO = round(time() * 1000) - 172800000
@@ -59,7 +59,9 @@ def get_user_games(user_name: str, since: int, is_retry: bool = False):
     return [json.loads(game) for game in response.text.strip().split("\n") if game]
 
 
-def main(request):
+# Triggered from a message on a Cloud Pub/Sub topic.
+@functions_framework.cloud_event
+def main(cloud_event):
     for i, user in enumerate(USERS):
         # if not i == 0:
         #     sleep(2)
@@ -67,5 +69,3 @@ def main(request):
         if not user_games:
             raise Exception(f"Failed to get games for {user}")
         print(f"Found recent games for {user}")
-
-    return Response(json.dumps({"ok": True}), mimetype="application/json")
