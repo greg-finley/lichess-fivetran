@@ -2,4 +2,7 @@
 
 Custom Fivetran Connector for Lichess games
 
-NOTE: Now this just raises errors if no recent games. It runs on cron instead of as a function called by Fivetran.
+I hacked together to paste into Google Cloud Functions. There is duplication between the files, but:
+
+- `health_check.py`: Alert me if no recent games (bot broken?)
+- `etl.py`: ETL from Lichess to BigQuery
