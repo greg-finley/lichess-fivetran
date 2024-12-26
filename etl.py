@@ -20,6 +20,7 @@ USERS = [
     "MinOpponentMoves",
     # "HalfStockfishBot",
 ]
+LIMIT = 3000
 
 
 class HttpClient:
@@ -49,7 +50,7 @@ def get_user_games(user_name: str, since: int, is_retry: bool = False):
             "pgnInJson": "true",
             "sort": "dateAsc",
             "lastFen": "true",
-            "max": 500,
+            "max": LIMIT,
             "tags": "false",
             "moves": "false",
         },
@@ -88,7 +89,7 @@ def main(request):
         print(f"Found {len(user_games)} recent games for {user}")
         games.extend(user_games)
         state[user] = user_games[-1]["createdAt"] - SIX_HOUR_BUFFER if user_games else previous_state.get(user, EARLIEST_LICHESS_TIME)
-        has_more = has_more or len(user_games) == 500
+        has_more = has_more or len(user_games) == LIMIT
     print(f"State: {state}")
     fivetran_format = to_fivetran_format(games, has_more=has_more, state=state)
     return jsonify(fivetran_format)
