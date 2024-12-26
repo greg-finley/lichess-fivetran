@@ -51,7 +51,7 @@ def get_user_games(user_name: str, since: int, is_retry: bool = False):
             "sort": "dateAsc",
             "lastFen": "true",
             "max": LIMIT,
-            "tags": "false",
+            "tags": "true",
             "moves": "true",
         },
     )
