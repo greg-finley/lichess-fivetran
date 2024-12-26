@@ -83,7 +83,7 @@ def main(request):
     state = {}
     has_more = False
     for i, user in enumerate(USERS):
-        if (not i == 0) and len(games) > 300:
+        if not i == 0:
             sleep(2)
         user_games = get_user_games(user, previous_state.get(user, EARLIEST_LICHESS_TIME))
         print(f"Found {len(user_games)} recent games for {user}")
