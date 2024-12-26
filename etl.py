@@ -52,7 +52,7 @@ def get_user_games(user_name: str, since: int, is_retry: bool = False):
             "lastFen": "true",
             "max": LIMIT,
             "tags": "false",
-            "moves": "false",
+            "moves": "true",
         },
     )
     if response.status_code == 429:
