@@ -5,8 +5,8 @@ import json
 from requests.adapters import HTTPAdapter, Retry
 from flask import jsonify  # type: ignore
 from time import sleep
-
-
+from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 import functions_framework  # type: ignore
 import os
 
@@ -22,6 +22,16 @@ USERS = [
     # "HalfStockfishBot",
 ]
 LIMIT = 3000
+
+def add_pacific_date(game):
+    created_at_ms = game.get('created_at')
+    if created_at_ms:
+        utc_dt = datetime.fromtimestamp(created_at_ms / 1000, tz=timezone.utc)
+        pacific_dt = utc_dt.astimezone(ZoneInfo('America/Los_Angeles'))
+        game['pacific_date'] = pacific_dt.date().isoformat()
+    else:
+        game['pacific_date'] = None
+    return game
 
 
 class HttpClient:
@@ -62,15 +72,43 @@ def get_user_games(user_name: str, since: int, is_retry: bool = False):
         sleep(60)
         return get_user_games(user_name, since, is_retry=True)
     response.raise_for_status()
-    return [json.loads(game) for game in response.text.strip().split("\n") if game]
+    return [add_pacific_date(json.loads(game)) for game in response.text.strip().split("\n") if game]
 
 
-def to_fivetran_format(games, has_more, state):
+def to_fivetran_format(games, has_more, state, schema):
     return {
         "hasMore": has_more,
         "insert": {"games": games},
         "state": state,
-        "schema": {"games": {"primary_key": ["id"]}},
+        "schema": {
+            "games": {
+                "columns": [
+                    {"name": "id", "type": "string"},
+                    {"name": "last_move_at", "type": "integer"},
+                    {"name": "players", "type": "string"},
+                    {"name": "last_move", "type": "string"},
+                    {"name": "last_fen", "type": "string"},
+                    {"name": "clock", "type": "string"},
+                    {"name": "source", "type": "string"},
+                    {"name": "speed", "type": "string"},
+                    {"name": "rated", "type": "boolean"},
+                    {"name": "created_at", "type": "integer"},
+                    {"name": "winner", "type": "string"},
+                    {"name": "pgn", "type": "string"},
+                    {"name": "variant", "type": "string"},
+                    {"name": "full_id", "type": "string"},
+                    {"name": "perf", "type": "string"},
+                    {"name": "status", "type": "string"},
+                    {"name": "initial_fen", "type": "string"},
+                    {"name": "days_per_turn", "type": "integer"},
+                    {"name": "tournament", "type": "string"},
+                    {"name": "swiss", "type": "string"},
+                    {"name": "moves", "type": "string"},
+                    {"name": "pacific_date", "type": "date"}
+                ],
+                "primary_key": ["id", "pacific_date"]
+            }
+        },
     }
 
 
