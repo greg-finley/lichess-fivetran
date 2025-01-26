@@ -75,7 +75,7 @@ def get_user_games(user_name: str, since: int, is_retry: bool = False):
     return [add_pacific_date(json.loads(game)) for game in response.text.strip().split("\n") if game]
 
 
-def to_fivetran_format(games, has_more, state, schema):
+def to_fivetran_format(games, has_more, state):
     return {
         "hasMore": has_more,
         "insert": {"games": games},
