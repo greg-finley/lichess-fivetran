@@ -24,13 +24,13 @@ USERS = [
 LIMIT = 3000
 
 def add_pacific_date(game):
-    created_at_ms = game.get('created_at')
+    created_at_ms = game.get('createdAt')
     if created_at_ms:
         utc_dt = datetime.fromtimestamp(created_at_ms / 1000, tz=timezone.utc)
         pacific_dt = utc_dt.astimezone(ZoneInfo('America/Los_Angeles'))
-        game['pacific_date'] = pacific_dt.date().isoformat()
+        game['pacificDate'] = pacific_dt.date().isoformat()
     else:
-        game['pacific_date'] = None
+        game['pacificDate'] = None
     return game
 
 
@@ -84,29 +84,29 @@ def to_fivetran_format(games, has_more, state):
             "games": {
                 "columns": [
                     {"name": "id", "type": "string"},
-                    {"name": "last_move_at", "type": "integer"},
+                    {"name": "lastMoveAt", "type": "integer"},
                     {"name": "players", "type": "string"},
-                    {"name": "last_move", "type": "string"},
-                    {"name": "last_fen", "type": "string"},
+                    {"name": "lastMove", "type": "string"},
+                    {"name": "lastFen", "type": "string"},
                     {"name": "clock", "type": "string"},
                     {"name": "source", "type": "string"},
                     {"name": "speed", "type": "string"},
                     {"name": "rated", "type": "boolean"},
-                    {"name": "created_at", "type": "integer"},
+                    {"name": "createdAt", "type": "integer"},
                     {"name": "winner", "type": "string"},
                     {"name": "pgn", "type": "string"},
                     {"name": "variant", "type": "string"},
-                    {"name": "full_id", "type": "string"},
+                    {"name": "fullId", "type": "string"},
                     {"name": "perf", "type": "string"},
                     {"name": "status", "type": "string"},
-                    {"name": "initial_fen", "type": "string"},
-                    {"name": "days_per_turn", "type": "integer"},
+                    {"name": "initialFen", "type": "string"},
+                    {"name": "daysPerTurn", "type": "integer"},
                     {"name": "tournament", "type": "string"},
                     {"name": "swiss", "type": "string"},
                     {"name": "moves", "type": "string"},
-                    {"name": "pacific_date", "type": "date"}
+                    {"name": "pacificDate", "type": "date"}
                 ],
-                "primary_key": ["id", "pacific_date"]
+                "primary_key": ["id", "pacificDate"]
             }
         },
     }
