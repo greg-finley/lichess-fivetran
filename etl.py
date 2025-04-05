@@ -109,7 +109,7 @@ def get_tournaments(tourney_name: str, team_name: str, tourney_type: TOURNEY_TYP
         params={
             "max": 10000,
             "status": "finished",
-            "name": tourney_name if tourney_type == 'swiss' else tourney_name + " Arena",
+            "name": tourney_name.replace(' ', '%20'),
         })
     if response.status_code == 429:
         if is_retry:
@@ -121,10 +121,10 @@ def get_tournaments(tourney_name: str, team_name: str, tourney_type: TOURNEY_TYP
         if tournament:
             yield add_metadata(json.loads(tournament), team_name=team_name, tourney_name=tourney_name, tourney_type=tourney_type)
 
-def to_fivetran_format(games, tournaments, has_more, state):
+def to_fivetran_format(games, swiss_tournaments, arena_tournaments, has_more, state):
     return {
         "hasMore": has_more,
-        "insert": {"games": games, "tournaments": tournaments},
+        "insert": {"games": games, "swissTournaments": swiss_tournaments, "arenaTournaments": arena_tournaments},
         "state": state,
         "schema": {
             "games": {
@@ -154,7 +154,7 @@ def to_fivetran_format(games, tournaments, has_more, state):
                 ],
                 "primary_key": ["id", "pacificDate"]
             },
-            "tournamentGames": {
+            "swissTournaments": {
                 "columns": [
                     {"name": "id", "type": "string"},
                     {"name": "lastMoveAt", "type": "integer"},
@@ -192,7 +192,8 @@ def main(request):
     print(f"Previous state: {previous_state}")
 
     games = []
-    tournaments = []
+    swiss_tournaments = []
+    arena_tournaments = []
     state = {}
     # Just assume we can do tourneys in one shot
     has_more = False
@@ -202,8 +203,12 @@ def main(request):
             for tourney_name in TOURNEYS_TO_FETCH[team_name][tourney_type]:
                 this_tournaments = get_tournaments(tourney_name, team_name, tourney_type, previous_state.get(tourney_name, EARLIEST_LICHESS_TIME))
                 print(f"Found {len(this_tournaments)} recent tournaments for {tourney_name}")
-                tournaments.extend(this_tournaments)
-                state[tourney_name] = this_tournaments[-1]["createdAt"] - SIX_HOUR_BUFFER if this_tournaments else previous_state.get(tourney_name, EARLIEST_LICHESS_TIME)
+                if tourney_type == "swiss":
+                    swiss_tournaments.extend(this_tournaments)
+                else:
+                    arena_tournaments.extend(this_tournaments)
+                # state[tourney_name] = this_tournaments[-1]["createdAt"] - SIX_HOUR_BUFFER if this_tournaments else previous_state.get(tourney_name, EARLIEST_LICHESS_TIME)
+                # TODO: Eventually get tourney results and games
 
     for user in enumerate(USERS):
         sleep(2)
@@ -213,5 +218,5 @@ def main(request):
         state[user] = user_games[-1]["createdAt"] - SIX_HOUR_BUFFER if user_games else previous_state.get(user, EARLIEST_LICHESS_TIME)
         has_more = has_more or len(user_games) == LIMIT
     print(f"State: {state}")
-    fivetran_format = to_fivetran_format(games, tournaments, has_more=has_more, state=state)
+    fivetran_format = to_fivetran_format(games, swiss_tournaments, arena_tournaments, has_more=has_more, state=state)
     return jsonify(fivetran_format)
