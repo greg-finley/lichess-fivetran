@@ -19,6 +19,7 @@ USERS = [
     "gbfgbfgbf",
     "MinOpponentMoves",
     "MateCheckCapture",
+    "marifinley",
     # "HalfStockfishBot",
 ]
 LIMIT = 3000
