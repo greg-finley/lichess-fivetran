@@ -14,11 +14,11 @@ EARLIEST_LICHESS_TIME = 1356998400070
 SIX_HOUR_BUFFER = 21600000
 LICHESS_TOKEN = os.environ["LICHESS_TOKEN"]
 USERS = [
-    "AlphaBotical",
+    # "AlphaBotical",
     "tmftmftmf",
     "gbfgbfgbf",
-    "MinOpponentMoves",
-    "MateCheckCapture",
+    # "MinOpponentMoves",
+    # "MateCheckCapture",
     "marifinley",
     # "HalfStockfishBot",
 ]
@@ -116,16 +116,15 @@ def to_fivetran_format(games, has_more, state):
 @functions_framework.http
 def main(request):
     request_json = request.get_json(silent=True) or {}
-    previous_state = request_json.get('state', {})
-    print(f"Previous state: {previous_state}")
+    state = request_json.get('state', {})
+    print(f"Previous state: {state}")
 
     games = []
-    state = {}
     has_more = False
     for i, user in enumerate(USERS):
         if not i == 0:
             sleep(2)
-        user_games = get_user_games(user, previous_state.get(user, EARLIEST_LICHESS_TIME))
+        user_games = get_user_games(user, state.get(user, EARLIEST_LICHESS_TIME))
         print(f"Found {len(user_games)} recent games for {user}")
         games.extend(user_games)
         state[user] = user_games[-1]["createdAt"] - SIX_HOUR_BUFFER if user_games else previous_state.get(user, EARLIEST_LICHESS_TIME)
