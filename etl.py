@@ -17,7 +17,7 @@ USERS = [
     # "AlphaBotical",
     "tmftmftmf",
     "gbfgbfgbf",
-    # "MinOpponentMoves",
+    "MinOpponentMoves",
     # "MateCheckCapture",
     "marifinley",
     # "HalfStockfishBot",
