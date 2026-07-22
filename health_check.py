@@ -24,6 +24,9 @@ class HttpClient:
         retries = Retry(total=3, backoff_factor=60)
         self.s.mount("https://", HTTPAdapter(max_retries=retries))
         self.s.mount("http://", HTTPAdapter(max_retries=retries))
+        self.s.headers.update({
+            "User-Agent": "lichess-fivetran/1.0 (https://github.com/greg-finley/lichess-fivetran)",
+        })
 
     def get(self, url: str, *, params=None, headers=None):
         return self.s.get(url, params=params, headers=headers)
